@@ -1,8 +1,9 @@
 # Seu código aqui
-from flask import Flask, json, request, jsonify
+from flask import Flask, request, jsonify
 from produtos_db import produtos
 
 app = Flask(__name__)
+
 
 @app.get('/')
 def greeting():
@@ -16,36 +17,40 @@ def list_products():
         new_product = data.get('name')
         produtos.append(data)
         return {'message': f"O Produto {new_product} foi adcionado em estoque!"}, 201
+
     elif request.method == 'GET':
         return jsonify(produtos), 200
 
-@app.get("/products/<int:product_id>")
-def get(product_id: int):
-    quantidade_de_produtos = len(produtos)
-    for x in produtos:
-        if quantidade_de_produtos < product_id or product_id < 1:
-            return {'message': 'Produto não existe'}
-        elif product_id == x['id']:
-            x = [x]
-            return jsonify(x), 200
-
-@app.route('/products/<int:product_id>', methods=["PATCH","PUT"])
+@app.route('/products/<int:product_id>', methods=['GET',"PATCH","PUT","DELETE"])
 def update(product_id: int):
     quantidade_de_produtos = len(produtos)
-    for x in produtos:
-        if quantidade_de_produtos < product_id or product_id < 1:
-            return {'message': 'Produto não existe'},204
-        elif product_id == x['id']:
-            data= request.get_json()
-            x['name'] =data['name']
-            return jsonify(), 204   
+    
+    if request.method == "PATCH" or request.method == "PUT":
+        for product in produtos:
+            if quantidade_de_produtos < product_id or product_id < 1:
+                return {'message': 'Produto não existe'}
 
-@app.delete('/products/<int:product_id>')
-def delete(product_id):
-    quantidade_de_produtos = len(produtos)
-    for indice, product in enumerate(produtos):
-        if quantidade_de_produtos < product_id or product_id < 1:
-            return {'message': 'Produto não existe'},204
-        elif product_id == product['id']:
-            del produtos[indice]
-            return jsonify(), 204      
+            elif product_id == product['id']:
+                data= request.get_json()
+                product['name'] =data['name']
+                return jsonify(), 204   
+
+
+    elif request.method == 'GET':
+        for product in produtos:
+            if quantidade_de_produtos < product_id or product_id < 1:
+                return {'message': 'Produto não existe'}
+
+            elif product_id == product['id']:
+                product = [product]
+                return jsonify(product), 200
+
+
+    elif request.method == 'DELETE':
+        for indice, product in enumerate(produtos):
+            if quantidade_de_produtos < product_id or product_id < 1:
+                return {'message': 'Produto não existe'}
+
+            elif product_id == product['id']:
+                del produtos[indice]
+                return jsonify(), 204

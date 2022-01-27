@@ -14,8 +14,10 @@ def greeting():
 def list_products():
     if request.method == 'POST':
         data = request.get_json()
+        data["id"] = len(produtos)
         new_product = data.get('name')
         produtos.append(data)
+        print(data)
         return {'message': f"O Produto {new_product} foi adcionado em estoque!"}, 201
 
     elif request.method == 'GET':
